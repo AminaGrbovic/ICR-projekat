@@ -1,5 +1,6 @@
 import Reservation from "../models/Reservation.js";
 import Pet from "../models/Pet.js";
+import Owner from "../models/Owner.js";
 import Vet from "../models/Vet.js";
 import errors from "../utils/errors.js";
 import ids from "../utils/ids.js";
@@ -18,27 +19,28 @@ async function getAll(auth) {
     .populate("owner")
     .populate("pet")
     .populate("vet");
-
-  return reservations.filter(
-    (reservation) =>
-      (auth.role !== "admin" || reservation.owner?.status === 1) &&
-      reservation.pet?.status === 1 &&
-      reservation.vet?.status === 1
-  );
+  return reservations;
 }
 
 async function create(data, auth) {
   assertDatabaseReady();
-  const pet = await Pet.findOne({
-    _id: data.ljubimac_id,
-    vlasnik_id: auth.user.vlasnik_id,
-    status: 1,
-  });
+  const petQuery = { _id: data.ljubimac_id, status: 1 };
+  if (auth.role !== "admin") {
+    petQuery.vlasnik_id = auth.user.vlasnik_id;
+  }
+  const pet = await Pet.findOne(petQuery);
   if (!pet) {
     throw new AppError(
       403,
-      "Možete rezervisati termin samo za svog aktivnog ljubimca."
+      auth.role === "admin"
+        ? "Izabrani ljubimac nije aktivan."
+        : "Možete rezervisati termin samo za svog aktivnog ljubimca."
     );
+  }
+
+  const owner = await Owner.findOne({ vlasnik_id: pet.vlasnik_id, status: 1 });
+  if (!owner) {
+    throw new AppError(422, "Vlasnik izabranog ljubimca nije aktivan.");
   }
 
   const vet = await Vet.findOne({
@@ -64,7 +66,7 @@ async function create(data, auth) {
     "rezervacija_id",
     {
       datum: date,
-      vlasnik_id: auth.user.vlasnik_id,
+      vlasnik_id: pet.vlasnik_id,
       veterinar_id: vet.veterinar_id,
       ljubimac_id: pet.ljubimac_id,
     }

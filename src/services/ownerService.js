@@ -1,3 +1,4 @@
+import bcrypt from "bcryptjs";
 import Owner from "../models/Owner.js";
 import Pet from "../models/Pet.js";
 import errors from "../utils/errors.js";
@@ -45,7 +46,25 @@ async function update(value, data) {
   if (!owner) {
     throw notFound("Owner not found");
   }
-  Object.assign(owner, pick(data, fields));
+
+  const values = pick(data, fields);
+  const duplicateErrors = {};
+  for (const field of ["email", "username"]) {
+    if (
+      values[field] !== undefined &&
+      (await Owner.exists({ [field]: values[field], _id: { $ne: owner._id } }))
+    ) {
+      duplicateErrors[field] = [`The ${field} has already been taken.`];
+    }
+  }
+  if (Object.keys(duplicateErrors).length) {
+    throw errors.validationError(duplicateErrors);
+  }
+  if (values.password !== undefined) {
+    values.password = await bcrypt.hash(values.password, 10);
+  }
+
+  Object.assign(owner, values);
   await owner.save();
   return owner;
 }

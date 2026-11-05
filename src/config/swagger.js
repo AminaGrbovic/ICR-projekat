@@ -100,7 +100,7 @@ const paths = {
     }),
   },
   "/api/public/vets-count": {
-    get: operation("Count active veterinarians", "Veterinarians", 200, ref("Count")),
+    get: auth("Count active veterinarians", "Veterinarians", 200, ref("Count")),
   },
   "/api/medicine": {
     get: auth("List medicines", "Medicines", 200, arrayOf("Medicine")),
@@ -130,6 +130,14 @@ const paths = {
   "/api/owners": {
     get: auth("List active owners (admin only)", "Owners", 200, arrayOf("Owner")),
   },
+  "/api/owners/me": {
+    get: auth("Get the authenticated owner's profile", "Owners", 200, ref("Owner")),
+    put: auth("Update the authenticated owner's profile", "Owners", 200, ref("Owner"), {
+      body: "OwnerInput",
+      bodyRequired: false,
+      validation: true,
+    }),
+  },
   "/api/owners/{id}": {
     get: auth("Get an active owner by ID (admin only)", "Owners", 200, ref("Owner"), {
       id: true,
@@ -148,26 +156,26 @@ const paths = {
     }),
   },
   "/api/pets": {
-    get: auth("List active pets for the owner, or all active pets for admin", "Pets", 200, arrayOf("Pet")),
-    post: auth("Create a pet", "Pets", 201, ref("Pet"), {
+    get: auth("List active pets belonging to the owner, or all pets for admin", "Pets", 200, arrayOf("Pet")),
+    post: auth("Create a pet for the owner, or assign one as admin", "Pets", 201, ref("Pet"), {
       body: "PetInput",
       bodyRequired: false,
       validation: true,
     }),
   },
   "/api/pets/{id}": {
-    get: auth("Get an active pet by ID", "Pets", 200, ref("Pet"), {
+    get: auth("Get an active pet belonging to the owner, or any pet as admin", "Pets", 200, ref("Pet"), {
       id: true,
       notFound: true,
     }),
-    put: auth("Update an active pet", "Pets", 200, ref("Pet"), {
+    put: auth("Update an active pet belonging to the owner, or any pet as admin", "Pets", 200, ref("Pet"), {
       id: true,
       body: "PetInput",
       bodyRequired: false,
       notFound: true,
       validation: true,
     }),
-    delete: auth("Deactivate an active pet", "Pets", 200, ref("Message"), {
+    delete: auth("Deactivate an active pet belonging to the owner, or any pet as admin", "Pets", 200, ref("Message"), {
       id: true,
       notFound: true,
     }),
@@ -198,14 +206,14 @@ const paths = {
     }),
   },
   "/api/reservations": {
-    get: auth("List reservations visible to the authenticated user", "Reservations", 200, arrayOf("Reservation")),
-    post: auth("Create a reservation (owner only)", "Reservations", 201, ref("Reservation"), {
+    get: auth("List the owner's reservations, or all reservations for admin", "Reservations", 200, arrayOf("Reservation")),
+    post: auth("Reserve an appointment for an owned pet, or any pet as admin", "Reservations", 201, ref("Reservation"), {
       body: "ReservationInput",
       validation: true,
     }),
   },
   "/api/reservations/{id}": {
-    delete: auth("Delete an owned reservation, or any reservation as admin", "Reservations", 200, ref("Message"), {
+    delete: auth("Cancel an owned reservation, or any reservation as admin", "Reservations", 200, ref("Message"), {
       id: true,
       notFound: true,
     }),

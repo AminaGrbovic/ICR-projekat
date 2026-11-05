@@ -7,12 +7,16 @@ import owners from "./owners.js";
 import pets from "./pets.js";
 import vets from "./vets.js";
 import reservations from "./reservations.js";
+import authenticate from "../middleware/authenticate.js";
+import authorize from "../middleware/authorize.js";
 
 const router = express.Router();
 
 router.use(auth);
 router.get(
   "/public/vets-count",
+  authenticate,
+  authorize("owner", "admin"),
   asyncHandler(vetController.count)
 );
 router.use("/medicine", medicine);

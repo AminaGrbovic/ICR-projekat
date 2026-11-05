@@ -11,10 +11,10 @@ router.use(authenticate, authorize("owner", "admin"));
 router.get("/", asyncHandler(controller.getAll));
 router.post(
   "/",
-  authorize("owner"),
+  authorize("owner", "admin"),
   validate(validator.createReservation),
   asyncHandler(controller.create)
 );
-router.delete("/:id", asyncHandler(controller.remove));
+router.delete("/:id", authorize("owner", "admin"), asyncHandler(controller.remove));
 
 export default router;

@@ -4,6 +4,14 @@ async function getAll(req, res) {
   res.json(await ownerService.getAll());
 }
 
+async function getMe(req, res) {
+  res.json(await ownerService.getById(req.auth.user.vlasnik_id));
+}
+
+async function updateMe(req, res) {
+  res.json(await ownerService.update(req.auth.user.vlasnik_id, req.body));
+}
+
 async function getById(req, res) {
   res.json(await ownerService.getById(req.params.id));
 }
@@ -17,4 +25,4 @@ async function remove(req, res) {
   res.json({ message: "Owner deleted successfully" });
 }
 
-export default { getAll, getById, update, remove };
+export default { getAll, getMe, updateMe, getById, update, remove };

@@ -36,4 +36,29 @@ function login(body) {
   return errors;
 }
 
-export default { registerOwner, login };
+function updateOwner(body) {
+  const errors = {};
+  for (const field of ["ime", "prezime", "adresa", "tel", "email", "username"]) {
+    if (!Object.hasOwn(body, field)) {
+      continue;
+    }
+    if (typeof body[field] !== "string") {
+      errors[field] = [`The ${field} must be a string.`];
+    } else if (body[field].length > 255) {
+      errors[field] = [`The ${field} must not be greater than 255 characters.`];
+    }
+  }
+  if (
+    typeof body.email === "string" &&
+    body.email.length > 0 &&
+    !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email)
+  ) {
+    errors.email = ["The email must be a valid email address."];
+  }
+  if (Object.hasOwn(body, "password")) {
+    requiredString(body, "password", errors, { min: 6 });
+  }
+  return errors;
+}
+
+export default { registerOwner, login, updateOwner };
