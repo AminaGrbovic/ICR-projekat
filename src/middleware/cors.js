@@ -1,6 +1,6 @@
 
 export default (req, res, next) => {
-  if (!req.path.startsWith("/api/")) {
+  if (req.path !== "/" && !req.path.startsWith("/api/")) {
     return next();
   }
   res.set("Access-Control-Allow-Origin", "*");

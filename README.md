@@ -38,4 +38,19 @@ All Laravel API routes under `/api` are retained:
 - Veterinarians: admins can manage veterinarians; authenticated owners can list/read them to book visits
 - Reservations: admins can manage all reservations; owners can list/cancel their own and book appointments only for their own pets
 
+## Run the full project
+
+The React/Vite clinic portal lives in `frontend/`. From the repository root, install all backend and frontend dependencies once, then start both servers with one command:
+
+```powershell
+npm install
+npm run dev:all
+```
+
+Vite opens the site automatically at [http://localhost:5173](http://localhost:5173). If the browser does not open, use that URL. Stop both servers with `Ctrl+C`.
+
+Before the first run, make sure the root `.env` has the required MongoDB, JWT, and initial-admin settings (copy `.env.example` to `.env` if needed), and that MongoDB is running or the configured Atlas database is reachable. The frontend proxies API calls through Vite to the backend at `http://127.0.0.1:3000`; `VITE_API_URL` defaults to `/api`.
+
+For separate development, `npm run dev` starts only the backend and `npm run dev:frontend` starts only the frontend.
+
 Protected routes use `Authorization: Bearer <JWT>`. Owner and veterinarian deletion is a status change; deleting an owner also deactivates their active pets. API validation and reservation ownership/availability rules follow the Laravel controllers and services.
